@@ -20,7 +20,7 @@
 #include <cstring>
 
 #include <iostream>
-#include <fstream>
+#include <stdio.h>
 using namespace std;
 
 namespace nix {
@@ -434,9 +434,11 @@ Path RemoteStore::addToStore(const string & name, const Path & _srcPath,
     auto conn(connections->get());
 
     // Temp
-    FILE *mytestfile;
-    mytestfile = fopen("mytestfile", "wb");
-    FdSink mytestsink = FdSink(fileno(mytestfile));
+    int mytestfile;
+    mytestfile = open("mytestfile", O_WRONLY|O_CREAT, 0644);
+    printf("mytestfile: %d\n", mytestfile);
+
+    FdSink mytestsink = FdSink(mytestfile);
 
 
     Path srcPath(absPath(_srcPath));
@@ -446,12 +448,12 @@ Path RemoteStore::addToStore(const string & name, const Path & _srcPath,
        << (recursive ? 1 : 0)
        << printHashType(hashAlgo);
 
-    fprintf(mytestfile, "Hello");
-    // // Temp
-    // mytestsink << wopAddToStore << name
-    //          << ((hashAlgo == htSHA256 && recursive) ? 0 : 1) /* backwards compatibility hack */
-    //          << (recursive ? 1 : 0)
-    //          << printHashType(hashAlgo);
+    // Temp
+    printf("Write to file\n");
+    mytestsink << wopAddToStore << name
+             << ((hashAlgo == htSHA256 && recursive) ? 0 : 1) /* backwards compatibility hack */
+             << (recursive ? 1 : 0)
+             << printHashType(hashAlgo);
 
     try {
         conn->to.written = 0;
@@ -463,7 +465,8 @@ Path RemoteStore::addToStore(const string & name, const Path & _srcPath,
 
             // Temp
             // dumpPath(srcPath, mytestfile, filter);
-            fclose(mytestfile);
+            close(mytestfile);
+            printf("Close file\n");
         }
         conn->to.warn = false;
         conn->processStderr();
