@@ -19,6 +19,10 @@
 
 #include <cstring>
 
+#include <iostream>
+#include <fstream>
+using namespace std;
+
 namespace nix {
 
 
@@ -429,12 +433,25 @@ Path RemoteStore::addToStore(const string & name, const Path & _srcPath,
 
     auto conn(connections->get());
 
+    // Temp
+    FILE *mytestfile;
+    mytestfile = fopen("mytestfile", "wb");
+    FdSink mytestsink = FdSink(fileno(mytestfile));
+
+
     Path srcPath(absPath(_srcPath));
 
     conn->to << wopAddToStore << name
        << ((hashAlgo == htSHA256 && recursive) ? 0 : 1) /* backwards compatibility hack */
        << (recursive ? 1 : 0)
        << printHashType(hashAlgo);
+
+    fprintf(mytestfile, "Hello");
+    // // Temp
+    // mytestsink << wopAddToStore << name
+    //          << ((hashAlgo == htSHA256 && recursive) ? 0 : 1) /* backwards compatibility hack */
+    //          << (recursive ? 1 : 0)
+    //          << printHashType(hashAlgo);
 
     try {
         conn->to.written = 0;
@@ -443,6 +460,10 @@ Path RemoteStore::addToStore(const string & name, const Path & _srcPath,
         {
             Finally cleanup([&]() { connections->decCapacity(); });
             dumpPath(srcPath, conn->to, filter);
+
+            // Temp
+            // dumpPath(srcPath, mytestfile, filter);
+            fclose(mytestfile);
         }
         conn->to.warn = false;
         conn->processStderr();
