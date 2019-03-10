@@ -449,7 +449,6 @@ Path RemoteStore::addToStore(const string & name, const Path & _srcPath,
        << printHashType(hashAlgo);
 
     // Temp
-    printf("Write to file\n");
     mytestsink << wopAddToStore << name
              << ((hashAlgo == htSHA256 && recursive) ? 0 : 1) /* backwards compatibility hack */
              << (recursive ? 1 : 0)
@@ -464,9 +463,7 @@ Path RemoteStore::addToStore(const string & name, const Path & _srcPath,
             dumpPath(srcPath, conn->to, filter);
 
             // Temp
-            // dumpPath(srcPath, mytestfile, filter);
-            close(mytestfile);
-            printf("Close file\n");
+            dumpPath(srcPath, mytestsink, filter);
         }
         conn->to.warn = false;
         conn->processStderr();
