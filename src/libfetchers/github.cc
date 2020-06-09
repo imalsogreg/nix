@@ -185,10 +185,16 @@ struct GitHubInputScheme : GitArchiveInputScheme
         auto host_url = maybeGetStrAttr(input.attrs, "url").value_or("github.com");
         auto url = fmt("https://api.%s/repos/%s/%s/commits/%s", // FIXME: check
             host_url, getStrAttr(input.attrs, "owner"), getStrAttr(input.attrs, "repo"), *input.getRef());
+
+        std::vector< std::tuple< std::string, std::string > > headers;
+        std::string accessToken = settings.githubAccessToken.get();
+        if (accessToken != "")
+            headers.push_back( std::tuple< std::string, std::string > {"Authorization", (format("token %1%") % accessToken).str()});
+
         auto json = nlohmann::json::parse(
             readFile(
                 store->toRealPath(
-                    downloadFile(store, url, "source", false).storePath)));
+                    downloadFileWithHeaders(store, url, headers, "source", false).storePath)));
         auto rev = Hash(json["sha"], htSHA1);
         debug("HEAD revision for '%s' is %s", url, rev.gitRev());
         return rev;

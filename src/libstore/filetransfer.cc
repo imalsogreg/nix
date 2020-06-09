@@ -100,6 +100,12 @@ struct curlFileTransfer : public FileTransfer
                 requestHeaders = curl_slist_append(requestHeaders, ("If-None-Match: " + request.expectedETag).c_str());
             if (!request.mimeType.empty())
                 requestHeaders = curl_slist_append(requestHeaders, ("Content-Type: " + request.mimeType).c_str());
+            for (auto it = request.headers.begin(); it != request.headers.end(); ++it){
+                format kv("%1%: %2%");
+                kv % std::get<0>(*it);
+                kv % std::get<1>(*it);
+                requestHeaders = curl_slist_append(requestHeaders, kv.str().c_str());
+            }
         }
 
         ~TransferItem()

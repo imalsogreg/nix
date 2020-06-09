@@ -36,6 +36,7 @@ extern FileTransferSettings fileTransferSettings;
 struct FileTransferRequest
 {
     std::string uri;
+    std::vector<std::tuple<std::string, std::string>> headers;
     std::string expectedETag;
     bool verifyTLS = true;
     bool head = false;
@@ -49,6 +50,9 @@ struct FileTransferRequest
 
     FileTransferRequest(const std::string & uri)
         : uri(uri), parentAct(getCurActivity()) { }
+
+    FileTransferRequest(const std::string & uri, std::vector<std::tuple<std::string, std::string>> headers)
+        : uri(uri), headers(headers) { }
 
     std::string verb()
     {

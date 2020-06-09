@@ -116,6 +116,13 @@ struct DownloadFileResult
     std::string effectiveUrl;
 };
 
+DownloadFileResult downloadFileWithHeaders(
+    ref<Store> store,
+    const std::string & url,
+    const std::vector< std::tuple <std::string, std::string > > & headers,
+    const std::string & name,
+    bool immutable);
+
 DownloadFileResult downloadFile(
     ref<Store> store,
     const std::string & url,

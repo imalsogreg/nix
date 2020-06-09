@@ -5,12 +5,15 @@
 #include "store-api.hh"
 #include "archive.hh"
 #include "tarfile.hh"
+#include "types.hh"
 
 namespace nix::fetchers {
 
-DownloadFileResult downloadFile(
+
+DownloadFileResult downloadFileWithHeaders(
     ref<Store> store,
     const std::string & url,
+    const std::vector< std::tuple< std::string, std::string > > & headers,
     const std::string & name,
     bool immutable)
 {
@@ -36,7 +39,7 @@ DownloadFileResult downloadFile(
     if (cached && !cached->expired)
         return useCached();
 
-    FileTransferRequest request(url);
+    FileTransferRequest request(url, headers);
     if (cached)
         request.expectedETag = getStrAttr(cached->infoAttrs, "etag");
     FileTransferResult res;
@@ -100,6 +103,18 @@ DownloadFileResult downloadFile(
         .etag = res.etag,
         .effectiveUrl = res.effectiveUri,
     };
+}
+
+DownloadFileResult downloadFile(
+    ref<Store> store,
+    const std::string & url,
+    const std::string & name,
+    bool immutable
+    )
+{
+    std::vector< std::tuple< std::string, std::string > > headers;
+    DownloadFileResult r = downloadFileWithHeaders(store, url, headers, name, immutable);
+    return r;
 }
 
 std::pair<Tree, time_t> downloadTarball(
