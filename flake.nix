@@ -1,5 +1,6 @@
 {
   description = "The purely functional package manager";
+  edition =  201909;
 
   inputs.nixpkgs.url = "nixpkgs/nixos-20.03-small";
 
