@@ -191,6 +191,8 @@ struct GitHubInputScheme : GitArchiveInputScheme
         if (accessToken != "")
             headers.push_back( std::tuple< std::string, std::string > {"Authorization", (format("token %1%") % accessToken).str()});
 
+        printf("Hello from github fetcher.");
+
         auto json = nlohmann::json::parse(
             readFile(
                 store->toRealPath(
